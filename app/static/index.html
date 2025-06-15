@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>🎤🖌️ DrawBuddy</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 2em;
+        }
+        audio, img {
+            margin-top: 1em;
+        }
+        #generatedImage {
+            max-width: 500px;
+            margin-top: 1em;
+            border: 1px solid #ccc;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎤🖌️ DrawBuddy</h1>
+    <p>Speak into the mic, and this AI buddy will draw it for you!</p>
+
+    <button id="startBtn">🎙️ Start Recording</button>
+    <button id="stopBtn" disabled>⏹️ Stop & Generate</button>
+
+    <br />
+    <audio id="audioPlayback" controls></audio>
+    <br />
+    <img id="generatedImage" src="" alt="Generated Image" />
+    <p id="transcription"></p>
+
+    <script>
+        let mediaRecorder;
+        let audioChunks = [];
+
+        const startBtn = document.getElementById("startBtn");
+        const stopBtn = document.getElementById("stopBtn");
+        const audioPlayback = document.getElementById("audioPlayback");
+        const transcription = document.getElementById("transcription");
+        const generatedImage = document.getElementById("generatedImage");
+
+        startBtn.onclick = async () => {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            mediaRecorder = new MediaRecorder(stream);
+
+            mediaRecorder.ondataavailable = e => {
+                audioChunks.push(e.data);
+            };
+
+            mediaRecorder.onstop = async () => {
+                const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                const audioUrl = URL.createObjectURL(audioBlob);
+                audioPlayback.src = audioUrl;
+
+                const formData = new FormData();
+                formData.append("file", audioBlob, "audio.webm");
+
+                transcription.textContent = "Transcribing and generating image...";
+                generatedImage.src = "";
+
+                const res = await fetch("/process-audio/", {
+                    method: "POST",
+                    body: formData,
+                });
+
+                const result = await res.json();
+
+                if (result.error) {
+                    transcription.textContent = "❌ " + result.error;
+                } else {
+                    transcription.textContent = `📝 You said: "${result.text}"`;
+                    // Add cache-busting timestamp
+                    generatedImage.src = `${result.image_url}?rand=${Date.now()}`;
+                }
+
+                audioChunks = [];
+            };
+
+            mediaRecorder.start();
+            startBtn.disabled = true;
+            stopBtn.disabled = false;
+        };
+
+        stopBtn.onclick = () => {
+            mediaRecorder.stop();
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+        };
+    </script>
+</body>
+</html>
