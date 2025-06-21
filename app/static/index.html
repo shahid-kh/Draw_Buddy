@@ -150,25 +150,72 @@
                 max-width: 98vw;
             }
         }
+        .split-container {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: stretch;
+            gap: 2.5rem;
+            width: 100%;
+            max-width: 1100px;
+            margin: 2rem auto 0 auto;
+            height: 520px;
+            min-height: 340px;
+        }
+        .left-pane {
+            flex: 1 1 340px;
+            min-width: 320px;
+            max-width: 420px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
+        .right-pane {
+            flex: 2 1 420px;
+            min-width: 320px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 420px;
+            height: 100%;
+            overflow: auto;
+        }
+        @media (max-width: 900px) {
+            .split-container {
+                flex-direction: column;
+                gap: 1.5rem;
+                align-items: center;
+                height: auto;
+            }
+            .right-pane, .left-pane {
+                max-width: 98vw;
+                min-width: unset;
+                height: auto;
+            }
+        }
     </style>
 </head>
 <body>
     <h1>🎤🖌️ DrawBuddy</h1>
     <p>Speak into the mic, and this AI buddy will draw it for you!</p>
-    <div class="card">
-        <div style="display: flex; flex-direction: column; gap: 1.2em; align-items: center;">
-            <div style="display: flex; gap: 0.5em; width: 100%; justify-content: center; flex-wrap: wrap;">
-                <button id="startBtn">🎙️ Start Recording</button>
-                <button id="stopBtn" disabled>⏹️ Stop & Generate</button>
+    <div class="split-container">
+        <div class="left-pane card">
+            <div style="display: flex; flex-direction: column; gap: 1.2em; align-items: center;">
+                <div style="display: flex; gap: 0.5em; width: 100%; justify-content: center; flex-wrap: wrap;">
+                    <button id="startBtn">🎙️ Start Recording</button>
+                    <button id="stopBtn" disabled>⏹️ Stop & Generate</button>
+                </div>
+                <div style="display: flex; gap: 0.5em; width: 100%; justify-content: center; flex-wrap: wrap;">
+                    <input id="textPrompt" type="text" placeholder="Type your prompt here..." style="padding:0.7em 1em; border-radius:1.2em; border:1px solid var(--primary); font-size:1.1em; width: 220px; max-width: 60vw; outline:none; background:var(--secondary); color:var(--bg); transition: border 0.2s;" />
+                    <button id="generateBtn" style="background: var(--success);">🖌️ Generate</button>
+                </div>
             </div>
-            <div style="display: flex; gap: 0.5em; width: 100%; justify-content: center; flex-wrap: wrap;">
-                <input id="textPrompt" type="text" placeholder="Type your prompt here..." style="padding:0.7em 1em; border-radius:1.2em; border:1px solid var(--primary); font-size:1.1em; width: 220px; max-width: 60vw; outline:none; background:var(--secondary); color:var(--bg); transition: border 0.2s;" />
-                <button id="generateBtn" style="background: var(--success);">🖌️ Generate</button>
-            </div>
+            <audio id="audioPlayback" controls style="display:none;"></audio>
+            <p id="transcription"></p>
         </div>
-        <audio id="audioPlayback" controls style="display:none;"></audio>
-        <img id="generatedImage" src="" alt="Generated Image" style="display:none;" />
-        <p id="transcription"></p>
+        <div class="right-pane card">
+            <img id="generatedImage" src="" alt="Generated Image" style="display:none; max-width:100%; max-height:480px; object-fit:contain; border-radius:1.2em; box-shadow:0 4px 24px #0004; background:#222f3e;" />
+        </div>
     </div>
 
     <script>

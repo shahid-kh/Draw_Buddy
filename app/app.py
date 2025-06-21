@@ -1,4 +1,3 @@
-
 # New endpoint for typed prompt
 from fastapi import Body
 from fastapi import FastAPI, UploadFile, File
@@ -9,7 +8,7 @@ from pydub import AudioSegment
 import soundfile as sf
 import numpy as np
 import vosk
-from utils.generate_image import generate_image_from_prompt
+from utils.generate_image import generate_image_from_prompt, dummy_generate_image_from_prompt
 import uuid
 import json
 import os
@@ -95,9 +94,12 @@ async def process_text(data: dict = Body(...)):
     if not prompt:
         return JSONResponse(status_code=400, content={"error": "No prompt provided."})
     try:
+        # For UI testing, always return the last output.png
+        #image = dummy_generate_image_from_prompt(prompt)  # Now imported from utils.generate_image
+
+        # For production, use the following line instead:
         image = generate_image_from_prompt(prompt)
-        if isinstance(image, str):  # Error string
-            return JSONResponse(status_code=500, content={"error": image})
+
         image.save("output.png")
         return {
             "text": prompt,

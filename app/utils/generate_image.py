@@ -1,11 +1,12 @@
 
+
 import requests
 from PIL import Image
 from io import BytesIO
 import os
 import base64
 
-STABILITY_API_KEY = ""
+STABILITY_API_KEY = "sk-FPiQC6t4pMDCYC1nVLnL8h1pMufDb8yfcQDANxfhd899fbvW"
 
 def generate_image_from_prompt(prompt: str):
     ENGINE_ID = "stable-diffusion-xl-1024-v1-0"
@@ -36,3 +37,8 @@ def generate_image_from_prompt(prompt: str):
     image = Image.open(BytesIO(image_bytes))
 
     return image
+
+# Dummy function for UI testing: always returns the last output.png
+def dummy_generate_image_from_prompt(prompt: str):
+    from PIL import Image
+    return Image.open("output.png")
