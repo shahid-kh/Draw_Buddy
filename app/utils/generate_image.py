@@ -5,7 +5,7 @@ from io import BytesIO
 import os
 import base64
 
-STABILITY_API_KEY = "sk-FPiQC6t4pMDCYC1nVLnL8h1pMufDb8yfcQDANxfhd899fbvW"
+STABILITY_API_KEY = ""
 
 def generate_image_from_prompt(prompt: str):
     ENGINE_ID = "stable-diffusion-xl-1024-v1-0"
