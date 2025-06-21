@@ -1,3 +1,6 @@
+
+# New endpoint for typed prompt
+from fastapi import Body
 from fastapi import FastAPI, UploadFile, File
 from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
@@ -86,6 +89,22 @@ async def process_audio(file: UploadFile = File(...)):
             if os.path.exists(path):
                 os.remove(path)
 
+@app.post("/process-text/")
+async def process_text(data: dict = Body(...)):
+    prompt = data.get("prompt", "").strip()
+    if not prompt:
+        return JSONResponse(status_code=400, content={"error": "No prompt provided."})
+    try:
+        image = generate_image_from_prompt(prompt)
+        if isinstance(image, str):  # Error string
+            return JSONResponse(status_code=500, content={"error": image})
+        image.save("output.png")
+        return {
+            "text": prompt,
+            "image_url": "/output.png"
+        }
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"error": str(e)})
 
 @app.get("/output.png")
 def serve_image():

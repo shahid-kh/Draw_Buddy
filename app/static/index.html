@@ -4,33 +4,172 @@
     <meta charset="UTF-8">
     <title>🎤🖌️ DrawBuddy</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            padding: 2em;
+        :root {
+            --primary: #00b894;
+            --secondary: #f1f6f9;
+            --accent: #fdcb6e;
+            --danger: #d63031;
+            --success: #0984e3;
+            --bg: #222f3e;
+            --text: #f5f6fa;
+            --card: #393e46;
         }
-        audio, img {
-            margin-top: 1em;
+        body {
+            font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 0;
+        }
+        h1 {
+            margin-top: 2.5rem;
+            font-size: 2.5rem;
+            letter-spacing: 2px;
+            color: var(--primary);
+            text-shadow: 0 2px 12px #0002;
+            animation: fadeInDown 1s cubic-bezier(.68,-0.55,.27,1.55);
+        }
+        p {
+            color: var(--accent);
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            animation: fadeIn 1.2s 0.2s backwards;
+        }
+        .card {
+            background: var(--card);
+            border-radius: 1.5rem;
+            box-shadow: 0 8px 32px 0 #0003;
+            padding: 2.5rem 2rem 2rem 2rem;
+            margin: 1.5rem 0;
+            display: inline-block;
+            min-width: 340px;
+            max-width: 90vw;
+            animation: fadeInUp 1.2s cubic-bezier(.68,-0.55,.27,1.55);
+        }
+        button {
+            background: var(--primary);
+            color: var(--text);
+            border: none;
+            border-radius: 2rem;
+            padding: 0.9em 2.2em;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 0.5em 0.7em;
+            cursor: pointer;
+            box-shadow: 0 2px 8px #0002;
+            transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+            outline: none;
+            position: relative;
+            overflow: hidden;
+        }
+        button:disabled {
+            background: #8886;
+            color: #ccc;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+        button:not(:disabled):hover {
+            background: var(--accent);
+            color: var(--bg);
+            transform: translateY(-2px) scale(1.04);
+            box-shadow: 0 6px 24px #0003;
+        }
+        button:not(:disabled):active {
+            background: var(--success);
+            color: var(--secondary);
+            transform: scale(0.98);
+        }
+        #audioPlayback {
+            margin-top: 1.5em;
+            width: 90%;
+            max-width: 400px;
+            border-radius: 1em;
+            background: var(--secondary);
+            box-shadow: 0 2px 12px #0002;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.7s, transform 0.7s;
+        }
+        #audioPlayback.show {
+            opacity: 1;
+            transform: translateY(0);
         }
         #generatedImage {
-            max-width: 500px;
-            margin-top: 1em;
-            border: 1px solid #ccc;
+            max-width: 420px;
+            width: 90vw;
+            margin-top: 1.5em;
+            border-radius: 1.2em;
+            border: 2px solid var(--primary);
+            box-shadow: 0 4px 24px #0004;
+            opacity: 0;
+            transform: scale(0.95);
+            transition: opacity 0.8s, transform 0.8s;
+        }
+        #generatedImage.show {
+            opacity: 1;
+            transform: scale(1);
+        }
+        #transcription {
+            font-size: 1.1rem;
+            margin-top: 1.2em;
+            min-height: 2.2em;
+            color: var(--success);
+            letter-spacing: 0.5px;
+            transition: color 0.3s;
+            animation: fadeIn 1.2s 0.3s backwards;
+        }
+        #transcription.error {
+            color: var(--danger);
+        }
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @media (max-width: 600px) {
+            .card {
+                padding: 1.2rem 0.5rem 1.2rem 0.5rem;
+                min-width: unset;
+            }
+            h1 {
+                font-size: 2rem;
+            }
+            #generatedImage {
+                max-width: 98vw;
+            }
         }
     </style>
 </head>
 <body>
     <h1>🎤🖌️ DrawBuddy</h1>
     <p>Speak into the mic, and this AI buddy will draw it for you!</p>
-
-    <button id="startBtn">🎙️ Start Recording</button>
-    <button id="stopBtn" disabled>⏹️ Stop & Generate</button>
-
-    <br />
-    <audio id="audioPlayback" controls></audio>
-    <br />
-    <img id="generatedImage" src="" alt="Generated Image" />
-    <p id="transcription"></p>
+    <div class="card">
+        <div style="display: flex; flex-direction: column; gap: 1.2em; align-items: center;">
+            <div style="display: flex; gap: 0.5em; width: 100%; justify-content: center; flex-wrap: wrap;">
+                <button id="startBtn">🎙️ Start Recording</button>
+                <button id="stopBtn" disabled>⏹️ Stop & Generate</button>
+            </div>
+            <div style="display: flex; gap: 0.5em; width: 100%; justify-content: center; flex-wrap: wrap;">
+                <input id="textPrompt" type="text" placeholder="Type your prompt here..." style="padding:0.7em 1em; border-radius:1.2em; border:1px solid var(--primary); font-size:1.1em; width: 220px; max-width: 60vw; outline:none; background:var(--secondary); color:var(--bg); transition: border 0.2s;" />
+                <button id="generateBtn" style="background: var(--success);">🖌️ Generate</button>
+            </div>
+        </div>
+        <audio id="audioPlayback" controls style="display:none;"></audio>
+        <img id="generatedImage" src="" alt="Generated Image" style="display:none;" />
+        <p id="transcription"></p>
+    </div>
 
     <script>
         let mediaRecorder;
@@ -41,6 +180,17 @@
         const audioPlayback = document.getElementById("audioPlayback");
         const transcription = document.getElementById("transcription");
         const generatedImage = document.getElementById("generatedImage");
+        const textPrompt = document.getElementById("textPrompt");
+        const generateBtn = document.getElementById("generateBtn");
+
+        function showElement(el) {
+            el.style.display = '';
+            setTimeout(() => el.classList.add('show'), 10);
+        }
+        function hideElement(el) {
+            el.classList.remove('show');
+            setTimeout(() => el.style.display = 'none', 400);
+        }
 
         startBtn.onclick = async () => {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -54,12 +204,14 @@
                 const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
                 const audioUrl = URL.createObjectURL(audioBlob);
                 audioPlayback.src = audioUrl;
+                showElement(audioPlayback);
 
                 const formData = new FormData();
                 formData.append("file", audioBlob, "audio.webm");
 
                 transcription.textContent = "Transcribing and generating image...";
-                generatedImage.src = "";
+                transcription.classList.remove('error');
+                hideElement(generatedImage);
 
                 const res = await fetch("/process-audio/", {
                     method: "POST",
@@ -70,10 +222,13 @@
 
                 if (result.error) {
                     transcription.textContent = "❌ " + result.error;
+                    transcription.classList.add('error');
+                    hideElement(generatedImage);
                 } else {
                     transcription.textContent = `📝 You said: "${result.text}"`;
-                    // Add cache-busting timestamp
+                    transcription.classList.remove('error');
                     generatedImage.src = `${result.image_url}?rand=${Date.now()}`;
+                    showElement(generatedImage);
                 }
 
                 audioChunks = [];
@@ -88,6 +243,44 @@
             mediaRecorder.stop();
             startBtn.disabled = false;
             stopBtn.disabled = true;
+        };
+
+        generateBtn.onclick = async () => {
+            const prompt = textPrompt.value.trim();
+            if (!prompt) {
+                transcription.textContent = "Please enter a prompt.";
+                transcription.classList.add('error');
+                hideElement(generatedImage);
+                return;
+            }
+            transcription.textContent = "Generating image...";
+            transcription.classList.remove('error');
+            hideElement(generatedImage);
+            showElement(transcription);
+            const res = await fetch("/process-text/", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ prompt })
+            });
+            const result = await res.json();
+            if (result.error) {
+                transcription.textContent = "❌ " + result.error;
+                transcription.classList.add('error');
+                hideElement(generatedImage);
+            } else {
+                transcription.textContent = `📝 You typed: "${prompt}"`;
+                transcription.classList.remove('error');
+                generatedImage.src = `${result.image_url}?rand=${Date.now()}`;
+                showElement(generatedImage);
+            }
+        };
+
+        // On page load, hide audio and image
+        window.onload = () => {
+            audioPlayback.classList.remove('show');
+            audioPlayback.style.display = 'none';
+            generatedImage.classList.remove('show');
+            generatedImage.style.display = 'none';
         };
     </script>
 </body>
