@@ -8,7 +8,7 @@ import base64
 
 STABILITY_API_KEY = ""
 
-def generate_image_from_prompt(prompt: str):
+def generate_image_from_prompt_old(prompt: str):
     ENGINE_ID = "stable-diffusion-xl-1024-v1-0"
     API_URL = f"https://api.stability.ai/v1/generation/{ENGINE_ID}/text-to-image"
 
@@ -42,3 +42,46 @@ def generate_image_from_prompt(prompt: str):
 def dummy_generate_image_from_prompt(prompt: str):
     from PIL import Image
     return Image.open("output.png")
+
+
+# Gemini-based image generation function
+
+# Gemini-based image generation function with same signature and output as generate_image_from_prompt
+def generate_image_from_prompt(prompt: str):
+    """
+    Generate an image using Google Gemini models.
+    Args:
+        prompt (str): The text prompt for image generation.
+    Returns:
+        Image.Image: PIL Image object if successful, else error string.
+    """
+    try:
+        from google import genai
+        from google.genai import types
+    except ImportError:
+        return "[Error] google-generativeai package not installed. Please install it with: pip install google-generativeai"
+
+    api_key = ""
+    if not api_key:
+        return "[Error] Gemini API key not provided. Set GEMINI_API_KEY environment variable."
+
+    try:
+        client = genai.Client(api_key=api_key)
+        contents = prompt
+        response = client.models.generate_content(
+            model="gemini-2.0-flash-preview-image-generation",
+            contents=contents,
+            config=types.GenerateContentConfig(
+                response_modalities=['TEXT', 'IMAGE']
+            )
+        )
+        for part in response.candidates[0].content.parts:
+            if getattr(part, 'inline_data', None) is not None:
+                image = Image.open(BytesIO(part.inline_data.data))
+                return image
+        return "[Error] No image data returned from Gemini API."
+    except Exception as e:
+        return f"[Error: Gemini API] {str(e)}"
+
+
+
